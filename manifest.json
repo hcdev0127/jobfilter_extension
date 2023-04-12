@@ -1,8 +1,18 @@
 {
   "manifest_version": 3,
   "name": "Reed Job Filter",
-  "version": "1.1.0",
-  "description": "Filters unwanted Reed.co.uk job listings.",
+  "version": "2.1.0",
+  "description": "Filter Reed.co.uk jobs by title and recruiter.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.reed.co.uk/*"
+  ],
+  "action": {
+    "default_title": "Reed Job Filter",
+    "default_popup": "popup.html"
+  },
   "content_scripts": [
     {
       "matches": [

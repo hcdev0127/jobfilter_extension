@@ -1,205 +1,264 @@
 (() => {
   "use strict";
 
-  // Prevent duplicate initialization
-  if (window.__REED_JOB_FILTER__) {
+  // Prevent the script from being initialized more than once.
+  if (window.__REED_JOB_FILTER_INITIALIZED__) {
     return;
   }
 
-  window.__REED_JOB_FILTER__ = true;
+  window.__REED_JOB_FILTER_INITIALIZED__ = true;
 
-  const CONFIG = {
-    blockedJobTitleKeywords: [
+  // ============================================
+  // Selectors
+  // ============================================
+
+  const SELECTORS = {
+    jobTitle: '[data-element="job_title"]',
+    recruiter: '[data-element="recruiter"]',
+    jobCard: 'article[class*="card"]'
+  };
+
+  // ============================================
+  // Default filters
+  // ============================================
+
+  const DEFAULT_FILTERS = {
+    titleKeywords: [
       "trainee"
     ],
 
-    blockedRecruiters: [
-      "Noir"
-    ],
-
-    jobTitleSelector: '[data-element="job_title"]',
-
-    recruiterSelector: '[data-element="recruiter"]',
-
-    cardSelector: 'article[class*="card"]',
-
-    scanDelay: 300
+    recruiters: [
+      "noir"
+    ]
   };
 
-  // ==========================================
-  // Normalize text
-  // ==========================================
+  // Current filters.
+  let filters = {
+    titleKeywords: [...DEFAULT_FILTERS.titleKeywords],
+    recruiters: [...DEFAULT_FILTERS.recruiters]
+  };
 
-  function normalize(text) {
-    return String(text || "")
+  // ============================================
+  // Text normalization
+  // ============================================
+
+  function normalizeText(value) {
+    return String(value || "")
       .replace(/\s+/g, " ")
       .trim()
       .toLowerCase();
   }
 
-  // ==========================================
-  // Check keyword
-  // ==========================================
+  // ============================================
+  // Check whether text contains any value
+  // ============================================
 
-  function containsKeyword(text, keywords) {
-    const normalizedText = normalize(text);
+  function containsAny(text, values) {
+    const normalizedText = normalizeText(text);
 
-    return keywords.some((keyword) =>
-      normalizedText.includes(normalize(keyword))
-    );
+    if (!normalizedText || !Array.isArray(values)) {
+      return false;
+    }
+
+    return values.some((value) => {
+      const normalizedValue = normalizeText(value);
+
+      if (!normalizedValue) {
+        return false;
+      }
+
+      return normalizedText.includes(normalizedValue);
+    });
   }
 
-  // ==========================================
-  // Find parent article.card
-  // ==========================================
+  // ============================================
+  // Find the parent job card
+  // ============================================
 
   function getJobCard(element) {
     if (!element) {
       return null;
     }
 
-    return element.closest(CONFIG.cardSelector);
+    return element.closest(SELECTORS.jobCard);
   }
 
-  // ==========================================
+  // ============================================
   // Hide job card
-  // ==========================================
+  // ============================================
 
-  function removeJob(card, reason) {
+  function hideJobCard(card, reason) {
     if (!card) {
       return;
     }
 
-    if (card.dataset.reedJobFilterRemoved === "1") {
-      return;
-    }
-
-    card.dataset.reedJobFilterRemoved = "1";
-
-    console.log(
-      `[Reed Job Filter] Removed job: ${reason}`
-    );
-
-    // Safer than card.remove() for React/Next.js
     card.style.setProperty(
       "display",
       "none",
       "important"
     );
+
+    card.dataset.reedJobFilterHidden = "true";
+
+    console.debug(
+      "[Reed Job Filter] Hidden:",
+      reason
+    );
   }
 
-  // ==========================================
-  // Check job title
-  // ==========================================
+  // ============================================
+  // Show job card
+  // ============================================
 
-  function checkJobTitle(titleElement) {
-    const card = getJobCard(titleElement);
-
+  function showJobCard(card) {
     if (!card) {
       return;
     }
 
-    const title = normalize(
-      titleElement.textContent
+    if (
+      card.dataset.reedJobFilterHidden === "true"
+    ) {
+      card.style.removeProperty("display");
+
+      delete card.dataset.reedJobFilterHidden;
+    }
+  }
+
+  // ============================================
+  // Evaluate a single job card
+  // ============================================
+
+  function evaluateJobCard(card) {
+    if (!card) {
+      return;
+    }
+
+    const titleElement = card.querySelector(
+      SELECTORS.jobTitle
     );
 
+    const recruiterElement = card.querySelector(
+      SELECTORS.recruiter
+    );
+
+    const title = titleElement
+      ? normalizeText(titleElement.textContent)
+      : "";
+
+    const recruiter = recruiterElement
+      ? normalizeText(recruiterElement.textContent)
+      : "";
+
+    // ==========================================
+    // TITLE FILTER
+    // ==========================================
+
     if (
-      containsKeyword(
+      containsAny(
         title,
-        CONFIG.blockedJobTitleKeywords
+        filters.titleKeywords
       )
     ) {
-      removeJob(
+      hideJobCard(
         card,
-        `blocked job title: "${title}"`
+        `title "${title}"`
       );
 
       return;
     }
-  }
 
-  // ==========================================
-  // Check recruiter
-  // ==========================================
-
-  function checkRecruiter(recruiterElement) {
-    const card = getJobCard(recruiterElement);
-
-    if (!card) {
-      return;
-    }
-
-    const recruiter = normalize(
-      recruiterElement.textContent
-    );
+    // ==========================================
+    // RECRUITER FILTER
+    // ==========================================
 
     if (
-      containsKeyword(
+      containsAny(
         recruiter,
-        CONFIG.blockedRecruiters
+        filters.recruiters
       )
     ) {
-      removeJob(
+      hideJobCard(
         card,
-        `blocked recruiter: "${recruiter}"`
+        `recruiter "${recruiter}"`
       );
+
+      return;
     }
+
+    // ==========================================
+    // Job no longer matches current filters
+    // ==========================================
+
+    showJobCard(card);
   }
 
-  // ==========================================
-  // Scan all jobs
-  // ==========================================
+  // ============================================
+  // Scan all currently loaded jobs
+  // ============================================
 
   function scanJobs() {
-    // -------------------------------
-    // Check job titles
-    // -------------------------------
-
-    const jobTitles = document.querySelectorAll(
-      CONFIG.jobTitleSelector
+    const cards = document.querySelectorAll(
+      SELECTORS.jobCard
     );
 
-    jobTitles.forEach(checkJobTitle);
-
-    // -------------------------------
-    // Check recruiters
-    // -------------------------------
-
-    const recruiters = document.querySelectorAll(
-      CONFIG.recruiterSelector
-    );
-
-    recruiters.forEach(checkRecruiter);
-  }
-
-  // ==========================================
-  // Schedule scan
-  // ==========================================
-
-  let scanTimer = null;
-
-  function scheduleScan() {
-    if (scanTimer !== null) {
-      return;
-    }
-
-    scanTimer = setTimeout(() => {
-      scanTimer = null;
-
+    cards.forEach((card) => {
       try {
-        scanJobs();
+        evaluateJobCard(card);
       } catch (error) {
         console.error(
-          "[Reed Job Filter] Scan error:",
+          "[Reed Job Filter] Failed to evaluate job:",
           error
         );
       }
-    }, CONFIG.scanDelay);
+    });
   }
 
-  // ==========================================
+  // ============================================
+  // Load filters from Chrome storage
+  // ============================================
+
+  function loadFilters() {
+    chrome.storage.local.get(
+      DEFAULT_FILTERS,
+      (result) => {
+        filters = {
+          titleKeywords:
+            Array.isArray(result.titleKeywords)
+              ? result.titleKeywords
+              : [],
+
+          recruiters:
+            Array.isArray(result.recruiters)
+              ? result.recruiters
+              : []
+        };
+
+        scanJobs();
+      }
+    );
+  }
+
+  // ============================================
+  // Debounced scanning
+  // ============================================
+
+  let scanTimeout = null;
+
+  function scheduleScan() {
+    if (scanTimeout !== null) {
+      return;
+    }
+
+    scanTimeout = setTimeout(() => {
+      scanTimeout = null;
+
+      scanJobs();
+    }, 250);
+  }
+
+  // ============================================
   // Observe dynamically loaded jobs
-  // ==========================================
+  // ============================================
 
   const observer = new MutationObserver(
     (mutations) => {
@@ -215,19 +274,50 @@
     }
   );
 
-  // ==========================================
-  // Start
-  // ==========================================
+  // ============================================
+  // Listen for filter changes
+  // ============================================
+
+  chrome.storage.onChanged.addListener(
+    (changes, areaName) => {
+      if (areaName !== "local") {
+        return;
+      }
+
+      if (changes.titleKeywords) {
+        filters.titleKeywords =
+          Array.isArray(
+            changes.titleKeywords.newValue
+          )
+            ? changes.titleKeywords.newValue
+            : [];
+      }
+
+      if (changes.recruiters) {
+        filters.recruiters =
+          Array.isArray(
+            changes.recruiters.newValue
+          )
+            ? changes.recruiters.newValue
+            : [];
+      }
+
+      // Re-evaluate all existing jobs immediately.
+      scanJobs();
+    }
+  );
+
+  // ============================================
+  // Start extension
+  // ============================================
 
   function start() {
     console.log(
       "[Reed Job Filter] Started"
     );
 
-    // Process jobs already on the page
-    scanJobs();
+    loadFilters();
 
-    // Monitor jobs added while scrolling
     if (document.body) {
       observer.observe(document.body, {
         childList: true,
@@ -236,9 +326,9 @@
     }
   }
 
-  // ==========================================
+  // ============================================
   // Initialize
-  // ==========================================
+  // ============================================
 
   if (document.readyState === "loading") {
     document.addEventListener(

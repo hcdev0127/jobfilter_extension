@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reed Job Filter</title>
+
+  <style>
+    body {
+      width: 360px;
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+      background: #ffffff;
+      color: #222;
+    }
+
+    h2 {
+      margin: 0 0 5px;
+      font-size: 18px;
+    }
+
+    .description {
+      margin: 0 0 20px;
+      color: #666;
+      font-size: 12px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      height: 38px;
+      padding: 0 10px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #333;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .hint {
+      margin-top: 5px;
+      color: #777;
+      font-size: 11px;
+    }
+
+    button {
+      width: 100%;
+      height: 40px;
+      border: 0;
+      border-radius: 5px;
+      background: #222;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #444;
+    }
+
+    #status {
+      height: 20px;
+      margin-top: 10px;
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>Reed Job Filter</h2>
+
+  <p class="description">
+    Automatically hide unwanted Reed jobs.
+  </p>
+
+  <div class="field">
+    <label for="titleKeywords">
+      Blocked Job Titles / Keywords
+    </label>
+
+    <input
+      id="titleKeywords"
+      type="text"
+      placeholder="trainee, intern, apprentice"
+    >
+
+    <div class="hint">
+      Example: trainee, intern, apprentice
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="recruiters">
+      Blocked Recruiters
+    </label>
+
+    <input
+      id="recruiters"
+      type="text"
+      placeholder="Noir, Hays"
+    >
+
+    <div class="hint">
+      Example: Noir, Hays, ABC Recruitment
+    </div>
+  </div>
+
+  <button id="saveButton">
+    Save & Apply
+  </button>
+
+  <div id="status"></div>
+
+  <script src="popup.js"></script>
+
+</body>
+</html>
