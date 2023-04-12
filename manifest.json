@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Reed Job Filter",
+  "version": "1.1.0",
+  "description": "Filters unwanted Reed.co.uk job listings.",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.reed.co.uk/jobs/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
