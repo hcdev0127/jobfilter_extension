@@ -13,7 +13,9 @@
 
   const SITE = location.hostname.includes("linkedin")
     ? "linkedin" : location.hostname.includes("reed")
-      ? "reed" : location.hostname.includes("bebee") ? "bebee" : "workable";
+      ? "reed" : location.hostname.includes("bebee")
+      ? "bebee" : location.hostname.includes("workable")
+       ? "workable" : "jobgether";
 
   // =========================================================
   // SELECTORS
@@ -41,6 +43,9 @@
     },
     workable: {
       description: 'div.jobBreakdown__job-breakdown--31MGR'
+    },
+    jobgether: {
+      description: 'div.bg-white>h2.text-lg.font-bold.text-primary.mb-4:has(+ div.relative) + div.relative'
     }
   };
 
