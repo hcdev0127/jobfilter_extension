@@ -33,12 +33,16 @@
 
     linkedin: {
       jobTitle: 'a[class*=iROdnqnavpKyZuWdSFnmPfffMLnixsk] span strong',
-      recruiter: 'span[class*=QMGXrjaeNxeiUcsCRfualFyKDrpJAGWKwjBlEU]',
-      jobCard: 'li[class*=fHkvhtewVFBzjqWkcBEcQqgevCMImQ]',
+      recruiter: 'div[class*=artdeco-entity-lockup__subtitle] span[dir=ltr]',
+      jobCard: 'li[data-occludable-job-id]',
 
       description: 'div.mt4 p[dir="ltr"]'
     },
     bebee: {
+      jobTitle: 'a[class*=iROdnqnavpKyZuWdSFnmPfffMLnixsk] span strong',
+      recruiter: 'span .truncate',
+      jobCard: 'article',
+
       description: 'div.max-w-4xl.mx-auto'
     },
     workable: {
