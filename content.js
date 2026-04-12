@@ -53,15 +53,17 @@
 
     descriptionKeywords: [
       "remote", "hybrid", "onsite", "on-site",
-      "frontend","backend","mobile",
-      "html","css","javascript","typescript","php","python","golang","rust","ruby","c#",
-      "node.js","django","flask",".net",
-      "react","vue","angular",
-      "laravel","symfony","codeigniter",
-      "postgre","mongo","mysql","sql",
-      "llm","ai","ml",
-      "aws","gcp","ci/cd","kubernetes","docker"
-    ]
+      "frontend", "backend", "mobile",
+      "html", "css", "javascript", "typescript", "php", "python", "golang", "rust", "ruby", "c#",
+      "node.js", "django", "flask", ".net",
+      "react", "vue", "angular",
+      "laravel", "symfony", "codeigniter",
+      "postgre", "mongo", "mysql", "sql",
+      "llm", "ai", "ml",
+      "aws", "gcp", "ci/cd", "kubernetes", "docker"
+    ],
+
+    descriptionRestrictKeywords: ["ai", "ml"]
   };
 
   let settings = {
@@ -93,45 +95,42 @@
   // =========================================================
   // COUNT KEYWORD
   // =========================================================
-
   function countKeyword(text, keyword) {
     if (!text || !keyword) {
       return 0;
     }
 
-    const normalizedText =
-      String(text).toLowerCase();
-
-    const normalizedKeyword =
-      String(keyword).trim().toLowerCase();
+    const normalizedText = String(text).toLowerCase();
+    const normalizedKeyword = String(keyword).trim().toLowerCase();
 
     if (!normalizedKeyword) {
       return 0;
     }
 
-    /*
-     * Special characters such as:
-     *
-     * CI/CD
-     * C++
-     * C#
-     * Node.js
-     * .NET
-     *
-     * are handled safely.
-     */
+    if (settings.descriptionRestrictKeywords.includes(normalizedKeyword)) {
+      const escapedKeyword = normalizedKeyword.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        "\\$&"
+      );
 
-    const regex = new RegExp(
-      escapeRegex(normalizedKeyword),
-      "gi"
-    );
+      const regex = new RegExp(`\\b${escapedKeyword}\\b`, "gi");
 
-    const matches =
-      normalizedText.match(regex);
+      return (normalizedText.match(regex) || []).length;
+    } else {
 
-    return matches
-      ? matches.length
-      : 0;
+      const regex = new RegExp(
+        escapeRegex(normalizedKeyword),
+        "gi"
+      );
+
+      const matches =
+        normalizedText.match(regex);
+
+      return matches
+        ? matches.length
+        : 0;
+    }
+
   }
 
   // =========================================================
@@ -415,6 +414,13 @@
               result.descriptionKeywords
             )
               ? result.descriptionKeywords
+              : [],
+
+          descriptionRestrictKeywords:
+            Array.isArray(
+              result.descriptionRestrictKeywords
+            )
+              ? result.descriptionRestrictKeywords
               : []
         };
 
