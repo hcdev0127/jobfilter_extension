@@ -19,6 +19,7 @@
   // SELECTORS
   // =========================================================
 
+  
   const SELECTORS = {
     reed: {
       jobTitle: '[data-element="job_title"]',
@@ -29,9 +30,9 @@
     },
 
     linkedin: {
-      jobTitle: ['a[class="job-card-list__title"]'].join(","),
-      recruiter: ['div[class="artdeco-entity-lockup__subtitle"]'].join(","),
-      jobCard: ['li[class="ember-view"]'].join(","),
+      jobTitle: ['a[class*=iROdnqnavpKyZuWdSFnmPfffMLnixsk] span strong'].join(","),
+      recruiter: ['span[class*=QMGXrjaeNxeiUcsCRfualFyKDrpJAGWKwjBlEU]'].join(","),
+      jobCard: ['li[class*=fHkvhtewVFBzjqWkcBEcQqgevCMImQ]'].join(","),
 
       // Reed description paragraphs
       description: 'div.mt4 p[dir="ltr"]'
