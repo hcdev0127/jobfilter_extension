@@ -1,72 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reed Job Filter</title>
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Job Search Filter</title>
 
   <style>
-    body {
-      width: 360px;
-      margin: 0;
-      padding: 20px;
+    * {
       box-sizing: border-box;
-      font-family: Arial, sans-serif;
-      background: #ffffff;
+    }
+
+    body {
+      width: 390px;
+      margin: 0;
+      padding: 18px;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      background: #f7f7f8;
       color: #222;
     }
 
-    h2 {
-      margin: 0 0 5px;
-      font-size: 18px;
+    h1 {
+      margin: 0;
+      font-size: 19px;
     }
 
     .description {
-      margin: 0 0 20px;
+      margin: 5px 0 18px;
       color: #666;
       font-size: 12px;
+    }
+
+    .field {
+      margin-bottom: 15px;
     }
 
     label {
       display: block;
       margin-bottom: 6px;
+
       font-size: 13px;
-      font-weight: bold;
+      font-weight: 600;
     }
 
     input {
       width: 100%;
       height: 38px;
+
       padding: 0 10px;
-      box-sizing: border-box;
+
       border: 1px solid #ccc;
-      border-radius: 5px;
+      border-radius: 6px;
+
+      background: white;
+
       font-size: 13px;
       outline: none;
     }
 
     input:focus {
-      border-color: #333;
-    }
-
-    .field {
-      margin-bottom: 16px;
+      border-color: #555;
     }
 
     .hint {
       margin-top: 5px;
+
       color: #777;
+
       font-size: 11px;
+      line-height: 1.4;
     }
 
     button {
       width: 100%;
       height: 40px;
+
       border: 0;
-      border-radius: 5px;
+      border-radius: 6px;
+
       background: #222;
       color: white;
-      font-weight: bold;
+
+      font-size: 13px;
+      font-weight: 600;
+
       cursor: pointer;
     }
 
@@ -75,31 +102,100 @@
     }
 
     #status {
-      height: 20px;
-      margin-top: 10px;
+      min-height: 18px;
+
+      margin-top: 9px;
+
       text-align: center;
+
       font-size: 12px;
     }
 
     .success {
-      color: green;
+      color: #16803c;
     }
 
     .error {
-      color: red;
+      color: #c62828;
+    }
+
+    .results {
+      margin-top: 18px;
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      padding-bottom: 7px;
+
+      border-bottom: 1px solid #ddd;
+
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .site {
+      color: #777;
+      font-size: 10px;
+      font-weight: normal;
+    }
+
+    #results {
+      max-height: 230px;
+      overflow-y: auto;
+    }
+
+    .result {
+      display: flex;
+      justify-content: space-between;
+
+      padding: 7px 2px;
+
+      border-bottom: 1px solid #eee;
+
+      font-size: 12px;
+    }
+
+    .keyword {
+      font-weight: 500;
+    }
+
+    .count {
+      min-width: 25px;
+
+      text-align: right;
+
+      font-weight: bold;
+    }
+
+    .empty {
+      padding: 12px 2px;
+
+      color: #777;
+
+      font-size: 12px;
+      text-align: center;
     }
   </style>
 </head>
 
 <body>
 
-  <h2>Reed Job Filter</h2>
+  <h1>Job Search Filter</h1>
 
   <p class="description">
-    Automatically hide unwanted Reed jobs.
+    Filter jobs and analyze technologies in descriptions.
   </p>
 
+
+  <!-- ==========================================
+       TITLE FILTER
+       ========================================== -->
+
   <div class="field">
+
     <label for="titleKeywords">
       Blocked Job Titles / Keywords
     </label>
@@ -108,14 +204,22 @@
       id="titleKeywords"
       type="text"
       placeholder="trainee, intern, apprentice"
+      autocomplete="off"
     >
 
     <div class="hint">
-      Example: trainee, intern, apprentice
+      Comma-separated keywords.
     </div>
+
   </div>
 
+
+  <!-- ==========================================
+       RECRUITER FILTER
+       ========================================== -->
+
   <div class="field">
+
     <label for="recruiters">
       Blocked Recruiters
     </label>
@@ -124,12 +228,44 @@
       id="recruiters"
       type="text"
       placeholder="Noir, Hays"
+      autocomplete="off"
     >
 
     <div class="hint">
-      Example: Noir, Hays, ABC Recruitment
+      Comma-separated recruiter names.
     </div>
+
   </div>
+
+
+  <!-- ==========================================
+       DESCRIPTION KEYWORDS
+       ========================================== -->
+
+  <div class="field">
+
+    <label for="descriptionKeywords">
+      Job Description Keywords
+    </label>
+
+    <input
+      id="descriptionKeywords"
+      type="text"
+      placeholder="JavaScript, Spring, Python, CI/CD"
+      autocomplete="off"
+    >
+
+    <div class="hint">
+      Counts occurrences in the current job description.
+      Special characters are supported.
+    </div>
+
+  </div>
+
+
+  <!-- ==========================================
+       SAVE
+       ========================================== -->
 
   <button id="saveButton">
     Save & Apply
@@ -137,7 +273,41 @@
 
   <div id="status"></div>
 
+
+  <!-- ==========================================
+       RESULTS
+       ========================================== -->
+
+  <div class="results">
+
+    <div class="results-header">
+
+      <span>
+        Current Job
+      </span>
+
+      <span
+        id="site"
+        class="site"
+      >
+        —
+      </span>
+
+    </div>
+
+    <div id="results">
+
+      <div class="empty">
+        Open a job to analyze its description.
+      </div>
+
+    </div>
+
+  </div>
+
+
   <script src="popup.js"></script>
 
 </body>
+
 </html>

@@ -7,7 +7,8 @@
     "storage"
   ],
   "host_permissions": [
-    "https://www.reed.co.uk/*"
+    "https://www.reed.co.uk/*",
+    "https://www.linkedin.com/jobs/*"
   ],
   "action": {
     "default_title": "Reed Job Filter",
@@ -16,7 +17,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.reed.co.uk/jobs/*"
+        "https://www.reed.co.uk/jobs/*",
+        "https://www.linkedin.com/jobs/*"
       ],
       "js": [
         "content.js"

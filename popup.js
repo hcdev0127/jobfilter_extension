@@ -1,75 +1,463 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const titleInput =
-    document.getElementById("titleKeywords");
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
 
-  const recruiterInput =
-    document.getElementById("recruiters");
+    const titleInput =
+      document.getElementById(
+        "titleKeywords"
+      );
 
-  const saveButton =
-    document.getElementById("saveButton");
+    const recruiterInput =
+      document.getElementById(
+        "recruiters"
+      );
 
-  const status =
-    document.getElementById("status");
+    const descriptionInput =
+      document.getElementById(
+        "descriptionKeywords"
+      );
 
-  const DEFAULTS = {
-    titleKeywords: ["trainee"],
-    recruiters: ["noir"]
-  };
+    const saveButton =
+      document.getElementById(
+        "saveButton"
+      );
 
-  function parseList(value) {
-    return value
-      .split(",")
-      .map(item => item.trim())
-      .filter(Boolean);
-  }
+    const status =
+      document.getElementById(
+        "status"
+      );
 
-  function loadSettings() {
-    chrome.storage.local.get(
-      DEFAULTS,
-      settings => {
-        titleInput.value =
-          settings.titleKeywords.join(", ");
+    const results =
+      document.getElementById(
+        "results"
+      );
 
-        recruiterInput.value =
-          settings.recruiters.join(", ");
-      }
-    );
-  }
+    const siteElement =
+      document.getElementById(
+        "site"
+      );
 
-  function saveSettings() {
-    const titleKeywords =
-      parseList(titleInput.value);
 
-    const recruiters =
-      parseList(recruiterInput.value);
+    // ==========================================
+    // Defaults
+    // ==========================================
 
-    chrome.storage.local.set(
-      {
-        titleKeywords,
-        recruiters
-      },
-      () => {
-        if (chrome.runtime.lastError) {
+    const DEFAULTS = {
+      titleKeywords: [
+        "trainee"
+      ],
+
+      recruiters: [
+        "noir"
+      ],
+
+      descriptionKeywords: [
+        "javascript",
+        "spring",
+        "python",
+        "ci/cd",
+        "java",
+        "salesforce",
+        "apex",
+        "react",
+        "node.js",
+        "typescript"
+      ]
+    };
+
+
+    // ==========================================
+    // Parse comma-separated input
+    // ==========================================
+
+    function parseList(value) {
+
+      return value
+        .split(",")
+        .map(
+          item => item.trim()
+        )
+        .filter(Boolean);
+
+    }
+
+
+    // ==========================================
+    // Remove duplicates
+    // ==========================================
+
+    function unique(values) {
+
+      const seen =
+        new Set();
+
+      return values.filter(
+        value => {
+
+          const normalized =
+            value.toLowerCase();
+
+          if (
+            seen.has(normalized)
+          ) {
+            return false;
+          }
+
+          seen.add(normalized);
+
+          return true;
+        }
+      );
+
+    }
+
+
+    // ==========================================
+    // Load settings
+    // ==========================================
+
+    function loadSettings() {
+
+      chrome.storage.local.get(
+        DEFAULTS,
+        settings => {
+
+          titleInput.value =
+            settings.titleKeywords.join(
+              ", "
+            );
+
+          recruiterInput.value =
+            settings.recruiters.join(
+              ", "
+            );
+
+          descriptionInput.value =
+            settings.descriptionKeywords.join(
+              ", "
+            );
+
+        }
+      );
+
+    }
+
+
+    // ==========================================
+    // Save settings
+    // ==========================================
+
+    function saveSettings() {
+
+      const titleKeywords =
+        unique(
+          parseList(
+            titleInput.value
+          )
+        );
+
+      const recruiters =
+        unique(
+          parseList(
+            recruiterInput.value
+          )
+        );
+
+      const descriptionKeywords =
+        unique(
+          parseList(
+            descriptionInput.value
+          )
+        );
+
+
+      chrome.storage.local.set(
+        {
+          titleKeywords,
+          recruiters,
+          descriptionKeywords
+        },
+        () => {
+
+          if (
+            chrome.runtime.lastError
+          ) {
+
+            status.textContent =
+              chrome.runtime
+                .lastError
+                .message;
+
+            status.className =
+              "error";
+
+            return;
+          }
+
+
           status.textContent =
-            "Error: " +
-            chrome.runtime.lastError.message;
+            "Saved and applied.";
 
-          status.className = "error";
+          status.className =
+            "success";
+
+
+          // Ask the active job page to analyze again.
+          requestAnalysis();
+
+        }
+      );
+
+    }
+
+
+    // ==========================================
+    // Render results
+    // ==========================================
+
+    function renderResults(
+      data
+    ) {
+
+      results.innerHTML = "";
+
+      if (
+        !data ||
+        !Array.isArray(
+          data.counts
+        ) ||
+        data.counts.length === 0
+      ) {
+
+        results.innerHTML = `
+          <div class="empty">
+            No configured keywords found.
+          </div>
+        `;
+
+        return;
+      }
+
+
+      data.counts.forEach(
+        item => {
+
+          const row =
+            document.createElement(
+              "div"
+            );
+
+          row.className =
+            "result";
+
+          row.innerHTML = `
+            <span class="keyword">
+              ${escapeHtml(
+                item.keyword
+              )}
+            </span>
+
+            <span class="count">
+              ${item.count}
+            </span>
+          `;
+
+          results.appendChild(
+            row
+          );
+
+        }
+      );
+
+    }
+
+
+    // ==========================================
+    // Escape HTML
+    // ==========================================
+
+    function escapeHtml(value) {
+
+      const div =
+        document.createElement(
+          "div"
+        );
+
+      div.textContent =
+        value;
+
+      return div.innerHTML;
+
+    }
+
+
+    // ==========================================
+    // Request analysis
+    // ==========================================
+
+    async function requestAnalysis() {
+
+      try {
+
+        const tabs =
+          await chrome.tabs.query({
+            active: true,
+            currentWindow: true
+          });
+
+
+        const tab =
+          tabs[0];
+
+        if (!tab?.id) {
           return;
         }
 
-        status.textContent =
-          "Saved successfully.";
 
-        status.className = "success";
+        const url =
+          tab.url || "";
+
+
+        if (
+          !url.includes(
+            "reed.co.uk/jobs"
+          ) &&
+          !url.includes(
+            "linkedin.com/jobs"
+          )
+        ) {
+
+          siteElement.textContent =
+            "Unsupported page";
+
+          results.innerHTML = `
+            <div class="empty">
+              Open a Reed or LinkedIn job page.
+            </div>
+          `;
+
+          return;
+
+        }
+
+
+        const response =
+          await chrome.tabs.sendMessage(
+            tab.id,
+            {
+              type:
+                "ANALYZE_DESCRIPTION"
+            }
+          );
+
+
+        if (
+          response?.success
+        ) {
+
+          siteElement.textContent =
+            response.site;
+
+          renderResults(
+            response
+          );
+
+        }
+
+      } catch (error) {
+
+        siteElement.textContent =
+          "Not ready";
+
+        results.innerHTML = `
+          <div class="empty">
+            Job description is not available yet.
+          </div>
+        `;
+
+      }
+
+    }
+
+
+    // ==========================================
+    // Receive automatic updates
+    // ==========================================
+
+    chrome.runtime.onMessage.addListener(
+      message => {
+
+        if (
+          message?.type ===
+          "DESCRIPTION_ANALYSIS"
+        ) {
+
+          siteElement.textContent =
+            message.payload.site;
+
+          renderResults(
+            message.payload
+          );
+
+        }
+
       }
     );
+
+
+    // ==========================================
+    // Save
+    // ==========================================
+
+    saveButton.addEventListener(
+      "click",
+      saveSettings
+    );
+
+
+    // ==========================================
+    // Enter = Save
+    // ==========================================
+
+    [
+      titleInput,
+      recruiterInput,
+      descriptionInput
+    ].forEach(
+      input => {
+
+        input.addEventListener(
+          "keydown",
+          event => {
+
+            if (
+              event.key === "Enter"
+            ) {
+
+              event.preventDefault();
+
+              saveSettings();
+
+            }
+
+          }
+        );
+
+      }
+    );
+
+
+    // ==========================================
+    // Initial load
+    // ==========================================
+
+    loadSettings();
+
+    // Try to analyze current page.
+    setTimeout(
+      requestAnalysis,
+      300
+    );
+
   }
-
-  saveButton.addEventListener(
-    "click",
-    saveSettings
-  );
-
-  loadSettings();
-});
+);

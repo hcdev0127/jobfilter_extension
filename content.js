@@ -1,46 +1,76 @@
 (() => {
   "use strict";
 
-  // Prevent the script from being initialized more than once.
-  if (window.__REED_JOB_FILTER_INITIALIZED__) {
+  if (window.__JOB_SEARCH_FILTER_INITIALIZED__) {
     return;
   }
 
-  window.__REED_JOB_FILTER_INITIALIZED__ = true;
+  window.__JOB_SEARCH_FILTER_INITIALIZED__ = true;
 
-  // ============================================
-  // Selectors
-  // ============================================
+  // =========================================================
+  // SITE
+  // =========================================================
+
+  const SITE = location.hostname.includes("linkedin")
+    ? "linkedin"
+    : "reed";
+
+  // =========================================================
+  // SELECTORS
+  // =========================================================
 
   const SELECTORS = {
-    jobTitle: '[data-element="job_title"]',
-    recruiter: '[data-element="recruiter"]',
-    jobCard: 'article[class*="card"]'
+    reed: {
+      jobTitle: '[data-element="job_title"]',
+      recruiter: '[data-element="recruiter"]',
+      jobCard: 'article[class*="card"]',
+
+      description: ['div[data-qa="job-description"]'].join(",")
+    },
+
+    linkedin: {
+      jobTitle: ['a[class="job-card-list__title"]'].join(","),
+      recruiter: ['div[class="artdeco-entity-lockup__subtitle"]'].join(","),
+      jobCard: ['li[class="ember-view"]'].join(","),
+
+      // Reed description paragraphs
+      description: 'div.mt4 p[dir="ltr"]'
+    }
   };
 
-  // ============================================
-  // Default filters
-  // ============================================
+  // =========================================================
+  // DEFAULT SETTINGS
+  // =========================================================
 
-  const DEFAULT_FILTERS = {
+  const DEFAULT_SETTINGS = {
     titleKeywords: [
       "trainee"
     ],
 
     recruiters: [
       "noir"
+    ],
+
+    descriptionKeywords: [
+      "remote", "hybrid", "onsite", "on-site",
+      "frontend","backend","mobile",
+      "html","css","javascript","typescript","php","python","golang","rust","ruby","c#",
+      "node.js","django","flask",".net",
+      "react","vue","angular",
+      "laravel","symfony","codeigniter",
+      "postgre","mongo","mysql","sql",
+      "llm","ai","ml",
+      "aws","gcp","ci/cd","kubernetes","docker"
     ]
   };
 
-  // Current filters.
-  let filters = {
-    titleKeywords: [...DEFAULT_FILTERS.titleKeywords],
-    recruiters: [...DEFAULT_FILTERS.recruiters]
+  let settings = {
+    ...DEFAULT_SETTINGS
   };
 
-  // ============================================
-  // Text normalization
-  // ============================================
+  // =========================================================
+  // TEXT NORMALIZATION
+  // =========================================================
 
   function normalizeText(value) {
     return String(value || "")
@@ -49,45 +79,199 @@
       .toLowerCase();
   }
 
-  // ============================================
-  // Check whether text contains any value
-  // ============================================
+  // =========================================================
+  // ESCAPE REGEX
+  // =========================================================
 
-  function containsAny(text, values) {
-    const normalizedText = normalizeText(text);
+  function escapeRegex(value) {
+    return value.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&"
+    );
+  }
 
-    if (!normalizedText || !Array.isArray(values)) {
-      return false;
+  // =========================================================
+  // COUNT KEYWORD
+  // =========================================================
+
+  function countKeyword(text, keyword) {
+    if (!text || !keyword) {
+      return 0;
     }
 
-    return values.some((value) => {
-      const normalizedValue = normalizeText(value);
+    const normalizedText =
+      String(text).toLowerCase();
 
-      if (!normalizedValue) {
-        return false;
+    const normalizedKeyword =
+      String(keyword).trim().toLowerCase();
+
+    if (!normalizedKeyword) {
+      return 0;
+    }
+
+    /*
+     * Special characters such as:
+     *
+     * CI/CD
+     * C++
+     * C#
+     * Node.js
+     * .NET
+     *
+     * are handled safely.
+     */
+
+    const regex = new RegExp(
+      escapeRegex(normalizedKeyword),
+      "gi"
+    );
+
+    const matches =
+      normalizedText.match(regex);
+
+    return matches
+      ? matches.length
+      : 0;
+  }
+
+  // =========================================================
+  // FIND DESCRIPTION
+  // =========================================================
+
+  function getDescriptionElement() {
+    const selectors =
+      SELECTORS[SITE].description;
+
+    return document.querySelector(
+      selectors
+    );
+  }
+
+  // =========================================================
+  // GET DESCRIPTION TEXT
+  // =========================================================
+
+  function getJobDescription() {
+    const element =
+      getDescriptionElement();
+
+    if (!element) {
+      return "";
+    }
+
+    return element.innerText ||
+      element.textContent ||
+      "";
+  }
+
+  // =========================================================
+  // ANALYZE DESCRIPTION
+  // =========================================================
+
+  function analyzeDescription() {
+    const description =
+      getJobDescription();
+
+    if (!description) {
+      return {
+        description: "",
+        counts: []
+      };
+    }
+
+    const counts = [];
+
+    for (
+      const keyword of
+      settings.descriptionKeywords
+    ) {
+      const count =
+        countKeyword(
+          description,
+          keyword
+        );
+
+      if (count > 0) {
+        counts.push({
+          keyword,
+          count
+        });
       }
+    }
 
-      return normalizedText.includes(normalizedValue);
+    // Highest count first
+    counts.sort(
+      (a, b) =>
+        b.count - a.count
+    );
+
+    return {
+      description,
+      counts
+    };
+  }
+
+  // =========================================================
+  // SEND RESULTS TO POPUP
+  // =========================================================
+
+  function sendAnalysisToPopup() {
+    const result =
+      analyzeDescription();
+
+    chrome.runtime.sendMessage({
+      type: "DESCRIPTION_ANALYSIS",
+      payload: {
+        site: SITE,
+        counts: result.counts
+      }
+    }).catch(() => {
+      // Popup isn't open. Ignore.
     });
   }
 
-  // ============================================
-  // Find the parent job card
-  // ============================================
+  // =========================================================
+  // JOB CARD
+  // =========================================================
 
   function getJobCard(element) {
     if (!element) {
       return null;
     }
 
-    return element.closest(SELECTORS.jobCard);
+    return element.closest(
+      SELECTORS[SITE].jobCard
+    );
   }
 
-  // ============================================
-  // Hide job card
-  // ============================================
+  // =========================================================
+  // CONTAINS ANY
+  // =========================================================
 
-  function hideJobCard(card, reason) {
+  function containsAny(text, values) {
+    const normalized =
+      normalizeText(text);
+
+    if (!normalized) {
+      return false;
+    }
+
+    return values.some(
+      value =>
+        normalized.includes(
+          normalizeText(value)
+        )
+    );
+  }
+
+  // =========================================================
+  // HIDE CARD
+  // =========================================================
+
+  function hideJobCard(
+    card,
+    reason
+  ) {
     if (!card) {
       return;
     }
@@ -98,17 +282,18 @@
       "important"
     );
 
-    card.dataset.reedJobFilterHidden = "true";
+    card.dataset.jobFilterHidden =
+      "true";
 
     console.debug(
-      "[Reed Job Filter] Hidden:",
+      "[Job Filter] Hidden:",
       reason
     );
   }
 
-  // ============================================
-  // Show job card
-  // ============================================
+  // =========================================================
+  // SHOW CARD
+  // =========================================================
 
   function showJobCard(card) {
     if (!card) {
@@ -116,221 +301,295 @@
     }
 
     if (
-      card.dataset.reedJobFilterHidden === "true"
+      card.dataset.jobFilterHidden ===
+      "true"
     ) {
-      card.style.removeProperty("display");
+      card.style.removeProperty(
+        "display"
+      );
 
-      delete card.dataset.reedJobFilterHidden;
+      delete card.dataset
+        .jobFilterHidden;
     }
   }
 
-  // ============================================
-  // Evaluate a single job card
-  // ============================================
+  // =========================================================
+  // EVALUATE JOB
+  // =========================================================
 
   function evaluateJobCard(card) {
     if (!card) {
       return;
     }
 
-    const titleElement = card.querySelector(
-      SELECTORS.jobTitle
-    );
+    const titleElement =
+      card.querySelector(
+        SELECTORS[SITE].jobTitle
+      );
 
-    const recruiterElement = card.querySelector(
-      SELECTORS.recruiter
-    );
+    const recruiterElement =
+      card.querySelector(
+        SELECTORS[SITE].recruiter
+      );
 
-    const title = titleElement
-      ? normalizeText(titleElement.textContent)
-      : "";
+    const title =
+      titleElement?.textContent || "";
 
-    const recruiter = recruiterElement
-      ? normalizeText(recruiterElement.textContent)
-      : "";
+    const recruiter =
+      recruiterElement?.textContent || "";
 
-    // ==========================================
     // TITLE FILTER
-    // ==========================================
-
     if (
       containsAny(
         title,
-        filters.titleKeywords
+        settings.titleKeywords
       )
     ) {
       hideJobCard(
         card,
-        `title "${title}"`
+        `title: ${title}`
       );
 
       return;
     }
 
-    // ==========================================
     // RECRUITER FILTER
-    // ==========================================
-
     if (
       containsAny(
         recruiter,
-        filters.recruiters
+        settings.recruiters
       )
     ) {
       hideJobCard(
         card,
-        `recruiter "${recruiter}"`
+        `recruiter: ${recruiter}`
       );
 
       return;
     }
-
-    // ==========================================
-    // Job no longer matches current filters
-    // ==========================================
 
     showJobCard(card);
   }
 
-  // ============================================
-  // Scan all currently loaded jobs
-  // ============================================
+  // =========================================================
+  // SCAN JOB CARDS
+  // =========================================================
 
   function scanJobs() {
-    const cards = document.querySelectorAll(
-      SELECTORS.jobCard
-    );
+    const cards =
+      document.querySelectorAll(
+        SELECTORS[SITE].jobCard
+      );
 
-    cards.forEach((card) => {
-      try {
-        evaluateJobCard(card);
-      } catch (error) {
-        console.error(
-          "[Reed Job Filter] Failed to evaluate job:",
-          error
-        );
-      }
-    });
+    cards.forEach(
+      evaluateJobCard
+    );
   }
 
-  // ============================================
-  // Load filters from Chrome storage
-  // ============================================
+  // =========================================================
+  // LOAD SETTINGS
+  // =========================================================
 
-  function loadFilters() {
+  function loadSettings() {
     chrome.storage.local.get(
-      DEFAULT_FILTERS,
-      (result) => {
-        filters = {
+      DEFAULT_SETTINGS,
+      result => {
+
+        settings = {
           titleKeywords:
-            Array.isArray(result.titleKeywords)
+            Array.isArray(
+              result.titleKeywords
+            )
               ? result.titleKeywords
               : [],
 
           recruiters:
-            Array.isArray(result.recruiters)
+            Array.isArray(
+              result.recruiters
+            )
               ? result.recruiters
+              : [],
+
+          descriptionKeywords:
+            Array.isArray(
+              result.descriptionKeywords
+            )
+              ? result.descriptionKeywords
               : []
         };
 
         scanJobs();
+
+        sendAnalysisToPopup();
       }
     );
   }
 
-  // ============================================
-  // Debounced scanning
-  // ============================================
-
-  let scanTimeout = null;
-
-  function scheduleScan() {
-    if (scanTimeout !== null) {
-      return;
-    }
-
-    scanTimeout = setTimeout(() => {
-      scanTimeout = null;
-
-      scanJobs();
-    }, 250);
-  }
-
-  // ============================================
-  // Observe dynamically loaded jobs
-  // ============================================
-
-  const observer = new MutationObserver(
-    (mutations) => {
-      for (const mutation of mutations) {
-        if (
-          mutation.type === "childList" &&
-          mutation.addedNodes.length > 0
-        ) {
-          scheduleScan();
-          break;
-        }
-      }
-    }
-  );
-
-  // ============================================
-  // Listen for filter changes
-  // ============================================
+  // =========================================================
+  // STORAGE CHANGES
+  // =========================================================
 
   chrome.storage.onChanged.addListener(
     (changes, areaName) => {
+
       if (areaName !== "local") {
         return;
       }
 
       if (changes.titleKeywords) {
-        filters.titleKeywords =
-          Array.isArray(
-            changes.titleKeywords.newValue
-          )
-            ? changes.titleKeywords.newValue
-            : [];
+        settings.titleKeywords =
+          changes.titleKeywords.newValue || [];
       }
 
       if (changes.recruiters) {
-        filters.recruiters =
-          Array.isArray(
-            changes.recruiters.newValue
-          )
-            ? changes.recruiters.newValue
-            : [];
+        settings.recruiters =
+          changes.recruiters.newValue || [];
       }
 
-      // Re-evaluate all existing jobs immediately.
+      if (changes.descriptionKeywords) {
+        settings.descriptionKeywords =
+          changes.descriptionKeywords.newValue || [];
+      }
+
       scanJobs();
+
+      sendAnalysisToPopup();
     }
   );
 
-  // ============================================
-  // Start extension
-  // ============================================
+  // =========================================================
+  // MESSAGE FROM POPUP
+  // =========================================================
+
+  chrome.runtime.onMessage.addListener(
+    (message, sender, sendResponse) => {
+
+      if (
+        message?.type ===
+        "ANALYZE_DESCRIPTION"
+      ) {
+        const result =
+          analyzeDescription();
+
+        sendResponse({
+          success: true,
+          site: SITE,
+          counts: result.counts
+        });
+
+        return true;
+      }
+
+      return false;
+    }
+  );
+
+  // =========================================================
+  // DEBOUNCE
+  // =========================================================
+
+  let scanTimer = null;
+
+  function scheduleScan() {
+    if (scanTimer !== null) {
+      return;
+    }
+
+    scanTimer = setTimeout(
+      () => {
+        scanTimer = null;
+
+        scanJobs();
+        sendAnalysisToPopup();
+      },
+      300
+    );
+  }
+
+  // =========================================================
+  // MUTATION OBSERVER
+  // =========================================================
+
+  const observer =
+    new MutationObserver(
+      mutations => {
+
+        for (
+          const mutation of mutations
+        ) {
+
+          if (
+            mutation.type ===
+            "childList" &&
+            mutation.addedNodes.length
+          ) {
+            scheduleScan();
+
+            break;
+          }
+        }
+      }
+    );
+
+  // =========================================================
+  // START
+  // =========================================================
 
   function start() {
     console.log(
-      "[Reed Job Filter] Started"
+      `[Job Filter] Started on ${SITE}`
     );
 
-    loadFilters();
+    loadSettings();
 
     if (document.body) {
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
+      observer.observe(
+        document.body,
+        {
+          childList: true,
+          subtree: true
+        }
+      );
     }
+
+    /*
+     * LinkedIn is a SPA.
+     * The URL can change without a
+     * full page reload.
+     */
+
+    let previousUrl =
+      location.href;
+
+    setInterval(() => {
+
+      if (
+        location.href !==
+        previousUrl
+      ) {
+        previousUrl =
+          location.href;
+
+        setTimeout(
+          () => {
+            scanJobs();
+            sendAnalysisToPopup();
+          },
+          500
+        );
+      }
+
+    }, 1000);
   }
 
-  // ============================================
-  // Initialize
-  // ============================================
+  // =========================================================
+  // INIT
+  // =========================================================
 
-  if (document.readyState === "loading") {
+  if (
+    document.readyState ===
+    "loading"
+  ) {
     document.addEventListener(
       "DOMContentLoaded",
       start,
