@@ -253,8 +253,8 @@ document.addEventListener(
           row.innerHTML = `
             <span class="keyword">
               ${escapeHtml(
-                item.keyword
-              )}
+            item.keyword
+          )}
             </span>
 
             <span class="count">
@@ -324,6 +324,9 @@ document.addEventListener(
           ) &&
           !url.includes(
             "linkedin.com/jobs"
+          ) &&
+          !url.includes(
+            "bebee.com/"
           )
         ) {
 

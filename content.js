@@ -13,13 +13,13 @@
 
   const SITE = location.hostname.includes("linkedin")
     ? "linkedin"
-    : "reed";
+    : location.hostname.includes("reed") ? "reed" : "bebee";
 
   // =========================================================
   // SELECTORS
   // =========================================================
 
-  
+
   const SELECTORS = {
     reed: {
       jobTitle: '[data-element="job_title"]',
@@ -34,8 +34,10 @@
       recruiter: ['span[class*=QMGXrjaeNxeiUcsCRfualFyKDrpJAGWKwjBlEU]'].join(","),
       jobCard: ['li[class*=fHkvhtewVFBzjqWkcBEcQqgevCMImQ]'].join(","),
 
-      // Reed description paragraphs
       description: 'div.mt4 p[dir="ltr"]'
+    },
+    bebee: {
+      description: 'div.max-w-4xl.mx-auto'
     }
   };
 
@@ -152,6 +154,7 @@
   // =========================================================
 
   function getJobDescription() {
+    console.log('getJobDescription');
     const element =
       getDescriptionElement();
 
@@ -171,6 +174,8 @@
   function analyzeDescription() {
     const description =
       getJobDescription();
+
+    console.log(description);
 
     if (!description) {
       return {
@@ -218,7 +223,7 @@
   function sendAnalysisToPopup() {
     const result =
       analyzeDescription();
-
+    console.log(result);
     chrome.runtime.sendMessage({
       type: "DESCRIPTION_ANALYSIS",
       payload: {
@@ -249,6 +254,7 @@
   // =========================================================
 
   function containsAny(text, values) {
+    console.log(text, values);
     const normalized =
       normalizeText(text);
 
