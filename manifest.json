@@ -9,7 +9,8 @@
   "host_permissions": [
     "https://www.reed.co.uk/*",
     "https://www.linkedin.com/jobs/*",
-    "https://bebee.com/*"
+    "https://bebee.com/*",
+    "https://jobs.workable.com/*"
   ],
   "action": {
     "default_title": "Reed Job Filter",
@@ -20,7 +21,8 @@
       "matches": [
         "https://www.reed.co.uk/jobs/*",
         "https://www.linkedin.com/jobs/*",
-        "https://bebee.com/*"
+        "https://bebee.com/*",
+        "https://jobs.workable.com/*"
       ],
       "js": [
         "content.js"

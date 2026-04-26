@@ -327,6 +327,9 @@ document.addEventListener(
           ) &&
           !url.includes(
             "bebee.com/"
+          ) &&
+          !url.includes(
+            "workable.com/"
           )
         ) {
 
