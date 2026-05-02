@@ -52,16 +52,15 @@ document.addEventListener(
       ],
 
       descriptionKeywords: [
-        "javascript",
-        "spring",
-        "python",
-        "ci/cd",
-        "java",
-        "salesforce",
-        "apex",
-        "react",
-        "node.js",
-        "typescript"
+        "remote", "hybrid", "onsite", "on-site",
+        "frontend", "backend", "mobile",
+        "html", "css", "javascript", "typescript", "php", "python", "golang", "rust", "ruby", "c#",
+        "node.js", "django", "flask", ".net",
+        "react", "vue", "angular",
+        "laravel", "symfony", "codeigniter",
+        "postgre", "mongo", "mysql", "sql",
+        "llm", "ai", "ml",
+        "aws", "gcp", "ci/cd", "kubernetes", "docker"
       ]
     };
 
@@ -296,7 +295,6 @@ document.addEventListener(
     // ==========================================
 
     async function requestAnalysis() {
-
       try {
 
         const tabs =
@@ -332,20 +330,8 @@ document.addEventListener(
             "workable.com/"
           )
         ) {
-
-          siteElement.textContent =
-            "Unsupported page";
-
-          results.innerHTML = `
-            <div class="empty">
-              Open a Reed or LinkedIn job page.
-            </div>
-          `;
-
           return;
-
         }
-
 
         const response =
           await chrome.tabs.sendMessage(
@@ -397,7 +383,6 @@ document.addEventListener(
           message?.type ===
           "DESCRIPTION_ANALYSIS"
         ) {
-
           siteElement.textContent =
             message.payload.site;
 
