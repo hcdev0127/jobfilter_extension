@@ -69,7 +69,7 @@
       "aws", "gcp", "ci/cd", "kubernetes", "docker"
     ],
 
-    descriptionRestrictKeywords: ["ai", "ml"]
+    descriptionRestrictKeywords: ["ai", "ml"],
   };
 
   let settings = {
@@ -227,7 +227,8 @@
       type: "DESCRIPTION_ANALYSIS",
       payload: {
         site: SITE,
-        counts: result.counts
+        counts: result.counts,
+        description: result.description
       }
     }).catch(() => {
       // Popup isn't open. Ignore.
@@ -485,7 +486,8 @@
         sendResponse({
           success: true,
           site: SITE,
-          counts: result.counts
+          counts: result.counts,
+          description: result.description,
         });
 
         return true;

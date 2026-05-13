@@ -22,6 +22,12 @@ document.addEventListener(
         "saveButton"
       );
 
+    const copyButton =
+      document.getElementById(
+        "copyButton"
+      );
+
+
     const status =
       document.getElementById(
         "status"
@@ -37,6 +43,15 @@ document.addEventListener(
         "site"
       );
 
+    const txtDescription =
+      document.getElementById(
+        "txtDescription"
+      );
+
+    const copyDescriptionButton =
+      document.getElementById(
+        "copyDescriptionButton"
+      );
 
     // ==========================================
     // Defaults
@@ -141,11 +156,132 @@ document.addEventListener(
 
     }
 
+    function copyDescription() {
+      const text = txtDescription.value;
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          showCopyStatus("copyDescriptionButton");
+        })
+        .catch(error => {
+          console.error(
+            "[Job Search Filter] Copy failed:",
+            error
+          );
+          // Fallback for pages where Clipboard API
+          // is unavailable.
+          fallbackCopy(text,"copyDescriptionButton");
+        });
+    }
+
+    function copyTechs() {
+      const results =
+        document.querySelectorAll(
+          ".result"
+        );
+
+      if (!results.length) {
+        return;
+      }
+
+      const lines = [];
+
+      results.forEach(result => {
+        const keyword =
+          result.querySelector(".keyword");
+
+        if (!keyword) {
+          return;
+        }
+
+        lines.push(
+          `${keyword.textContent.trim()}`
+        );
+      });
+
+      if (!lines.length) {
+        return;
+      }
+
+      const text = lines.join(" ");
+
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          showCopyStatus("copyButton");
+        })
+        .catch(error => {
+          console.error(
+            "[Job Search Filter] Copy failed:",
+            error
+          );
+
+          // Fallback for pages where Clipboard API
+          // is unavailable.
+          fallbackCopy(text,"copyButton");
+        });
+    }
+
+    function fallbackCopy(text,type) {
+      const textarea =
+        document.createElement("textarea");
+
+      textarea.value = text;
+
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      textarea.style.top = "0";
+
+      document.body.appendChild(
+        textarea
+      );
+
+      textarea.focus();
+      textarea.select();
+
+      try {
+        document.execCommand("copy");
+
+        showCopyStatus(type);
+
+      } catch (error) {
+
+        console.error(
+          "[Job Search Filter] Fallback copy failed:",
+          error
+        );
+
+      }
+
+      textarea.remove();
+    }
+
+    function showCopyStatus(type) {
+
+      const button =
+        document.getElementById(
+          type
+        );
+
+      if (!button) {
+        return;
+      }
+
+      const originalText =
+        button.textContent;
+
+      button.textContent =
+        "Copied!";
+
+      setTimeout(() => {
+
+        button.textContent =
+          originalText;
+
+      }, 1500);
+    }
 
     // ==========================================
     // Save settings
     // ==========================================
-
     function saveSettings() {
 
       const titleKeywords =
@@ -237,7 +373,6 @@ document.addEventListener(
         return;
       }
 
-
       data.counts.forEach(
         item => {
 
@@ -268,6 +403,7 @@ document.addEventListener(
         }
       );
 
+      txtDescription.value = data.description;
     }
 
 
@@ -403,6 +539,18 @@ document.addEventListener(
     saveButton.addEventListener(
       "click",
       saveSettings
+    );
+
+
+    copyButton.addEventListener(
+      "click",
+      copyTechs
+    );
+
+
+    copyDescriptionButton.addEventListener(
+      "click",
+      copyDescription
     );
 
 
