@@ -164,9 +164,7 @@ async (info, tab) => {
       b.count - a.count
   );
 
-  console.log(1);
   await chrome.action.openPopup();
-  console.log(2);
   await chrome.runtime.sendMessage({
     type: "DESCRIPTION_ANALYSIS",
     payload: {

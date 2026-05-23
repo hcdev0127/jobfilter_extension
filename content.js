@@ -26,13 +26,13 @@
       recruiter: '[data-element="recruiter"]',
       jobCard: 'article[class*="card"]',
 
-      description: ['div[data-qa="job-description"]'].join(",")
+      description: 'div[data-qa="job-description"]'
     },
 
     linkedin: {
-      jobTitle: ['a[class*=iROdnqnavpKyZuWdSFnmPfffMLnixsk] span strong'].join(","),
-      recruiter: ['span[class*=QMGXrjaeNxeiUcsCRfualFyKDrpJAGWKwjBlEU]'].join(","),
-      jobCard: ['li[class*=fHkvhtewVFBzjqWkcBEcQqgevCMImQ]'].join(","),
+      jobTitle: 'a[class*=iROdnqnavpKyZuWdSFnmPfffMLnixsk] span strong',
+      recruiter: 'span[class*=QMGXrjaeNxeiUcsCRfualFyKDrpJAGWKwjBlEU]',
+      jobCard: 'li[class*=fHkvhtewVFBzjqWkcBEcQqgevCMImQ]',
 
       description: 'div.mt4 p[dir="ltr"]'
     },
@@ -164,9 +164,9 @@
       return "";
     }
 
-    return element.innerText ||
+    return (element.innerText ||
       element.textContent ||
-      "";
+      "").trim();
   }
 
   // =========================================================
@@ -223,6 +223,7 @@
   function sendAnalysisToPopup() {
     const result =
       analyzeDescription();
+    console.log(result);
     chrome.runtime.sendMessage({
       type: "DESCRIPTION_ANALYSIS",
       payload: {
@@ -487,7 +488,7 @@
           success: true,
           site: SITE,
           counts: result.counts,
-          description: result.description,
+          description: result.description
         });
 
         return true;

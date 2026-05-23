@@ -460,10 +460,10 @@ document.addEventListener(
             "linkedin.com/jobs"
           ) &&
           !url.includes(
-            "bebee.com/"
+            "bebee.com"
           ) &&
           !url.includes(
-            "workable.com/"
+            "workable.com"
           )
         ) {
           return;
@@ -477,7 +477,6 @@ document.addEventListener(
                 "ANALYZE_DESCRIPTION"
             }
           );
-
 
         if (
           response?.success
@@ -519,6 +518,7 @@ document.addEventListener(
           message?.type ===
           "DESCRIPTION_ANALYSIS"
         ) {
+          console.log(message);
           siteElement.textContent =
             message.payload.site;
 
