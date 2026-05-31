@@ -463,7 +463,7 @@ document.addEventListener(
             "bebee.com"
           ) &&
           !url.includes(
-            "workable.com"
+            "jobs.workable.com"
           )
         ) {
           return;
