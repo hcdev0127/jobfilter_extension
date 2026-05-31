@@ -74,6 +74,7 @@ document.addEventListener(
         "react", "vue", "angular",
         "laravel", "symfony", "codeigniter",
         "postgre", "mongo", "mysql", "sql",
+        "claude", "cursor", "copilot",
         "llm", "ai", "ml",
         "aws", "gcp", "ci/cd", "kubernetes", "docker"
       ]
@@ -169,7 +170,7 @@ document.addEventListener(
           );
           // Fallback for pages where Clipboard API
           // is unavailable.
-          fallbackCopy(text,"copyDescriptionButton");
+          fallbackCopy(text, "copyDescriptionButton");
         });
     }
 
@@ -216,11 +217,11 @@ document.addEventListener(
 
           // Fallback for pages where Clipboard API
           // is unavailable.
-          fallbackCopy(text,"copyButton");
+          fallbackCopy(text, "copyButton");
         });
     }
 
-    function fallbackCopy(text,type) {
+    function fallbackCopy(text, type) {
       const textarea =
         document.createElement("textarea");
 
