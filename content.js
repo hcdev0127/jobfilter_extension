@@ -67,10 +67,11 @@
       "postgre", "mongo", "mysql", "sql",
       "claude", "cursor", "copilot",
       "llm", "ai", "ml",
-      "aws", "gcp", "ci/cd", "kubernetes", "docker"
+      "aws", "gcp", "ci/cd", "kubernetes", "docker",
+      "saas"
     ],
 
-    descriptionRestrictKeywords: ["ai", "ml","rust"],
+    descriptionRestrictKeywords: ["ai", "ml", "rust"],
   };
 
   let settings = {
