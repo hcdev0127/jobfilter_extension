@@ -12,8 +12,8 @@
   // =========================================================
 
   const SITE = location.hostname.includes("linkedin")
-    ? "linkedin"
-    : location.hostname.includes("reed") ? "reed" : "bebee";
+    ? "linkedin" : location.hostname.includes("reed")
+      ? "reed" : location.hostname.includes("bebee") ? "bebee" : "workable";
 
   // =========================================================
   // SELECTORS
@@ -38,6 +38,9 @@
     },
     bebee: {
       description: 'div.max-w-4xl.mx-auto'
+    },
+    workable: {
+      description: 'div.jobBreakdown__job-breakdown--31MGR'
     }
   };
 
