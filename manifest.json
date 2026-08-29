@@ -4,17 +4,22 @@
   "version": "2.1.0",
   "description": "Filter Reed.co.uk jobs by title and recruiter.",
   "permissions": [
-    "storage"
+    "storage",
+    "contextMenus"
   ],
   "host_permissions": [
     "https://www.reed.co.uk/*",
     "https://www.linkedin.com/jobs/*",
     "https://bebee.com/*",
-    "https://jobs.workable.com/*"
+    "https://jobs.workable.com/*",
+    "<all_urls>"
   ],
   "action": {
-    "default_title": "Reed Job Filter",
+    "default_title": "Job Filter",
     "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {

@@ -157,7 +157,6 @@
   // =========================================================
 
   function getJobDescription() {
-    console.log('getJobDescription');
     const element =
       getDescriptionElement();
 
@@ -177,8 +176,6 @@
   function analyzeDescription() {
     const description =
       getJobDescription();
-
-    console.log(description);
 
     if (!description) {
       return {
@@ -226,7 +223,6 @@
   function sendAnalysisToPopup() {
     const result =
       analyzeDescription();
-    console.log(result);
     chrome.runtime.sendMessage({
       type: "DESCRIPTION_ANALYSIS",
       payload: {
@@ -257,7 +253,6 @@
   // =========================================================
 
   function containsAny(text, values) {
-    console.log(text, values);
     const normalized =
       normalizeText(text);
 
