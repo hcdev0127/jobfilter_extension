@@ -18,11 +18,12 @@ const DEFAULT_SETTINGS = {
     "react", "vue", "angular",
     "laravel", "symfony", "codeigniter",
     "postgre", "mongo", "mysql", "sql",
+    "claude", "cursor", "copilot",
     "llm", "ai", "ml",
     "aws", "gcp", "ci/cd", "kubernetes", "docker"
   ],
 
-  descriptionRestrictKeywords: ["ai", "ml"]
+  descriptionRestrictKeywords: ["ai", "ml", "rust","java"],
 };
 
 let settings = {
@@ -122,60 +123,59 @@ function countKeyword(text, keyword) {
 }
 
 chrome.contextMenus.onClicked.addListener(
-async (info, tab) => {
+  async (info, tab) => {
 
-  if (
-    info.menuItemId !==
-    "research-technologies"
-  ) {
-    return;
-  }
-
-  if (!info.selectionText) {
-    return;
-  }
-
-  const selectedText =
-    info.selectionText;
-
-  const counts = [];
-
-  for (
-    const keyword of
-    settings.descriptionKeywords
-  ) {
-    const count =
-      countKeyword(
-        selectedText,
-        keyword
-      );
-
-    if (count > 0) {
-      counts.push({
-        keyword,
-        count
-      });
+    if (
+      info.menuItemId !==
+      "research-technologies"
+    ) {
+      return;
     }
-  }
 
-  // Highest count first
-  counts.sort(
-    (a, b) =>
-      b.count - a.count
-  );
-
-  console.log(1);
-  await chrome.action.openPopup();
-  console.log(2);
-  await chrome.runtime.sendMessage({
-    type: "DESCRIPTION_ANALYSIS",
-    payload: {
-      site: "From Selected Text",
-      counts: counts
+    if (!info.selectionText) {
+      return;
     }
-  }).catch(() => {
-    console.log('error');
-    // Popup isn't open. Ignore.
-  });
-}
+
+    const selectedText =
+      info.selectionText;
+
+    const counts = [];
+
+    for (
+      const keyword of
+      settings.descriptionKeywords
+    ) {
+      const count =
+        countKeyword(
+          selectedText,
+          keyword
+        );
+
+      if (count > 0) {
+        counts.push({
+          keyword,
+          count
+        });
+      }
+    }
+
+    // Highest count first
+    counts.sort(
+      (a, b) =>
+        b.count - a.count
+    );
+
+    await chrome.action.openPopup();
+    await chrome.runtime.sendMessage({
+      type: "DESCRIPTION_ANALYSIS",
+      payload: {
+        site: "From Selected Text",
+        counts: counts,
+        description: selectedText,
+      }
+    }).catch(() => {
+      console.log('error');
+      // Popup isn't open. Ignore.
+    });
+  }
 );

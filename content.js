@@ -26,13 +26,13 @@
       recruiter: '[data-element="recruiter"]',
       jobCard: 'article[class*="card"]',
 
-      description: ['div[data-qa="job-description"]'].join(",")
+      description: 'div[data-qa="job-description"]'
     },
 
     linkedin: {
-      jobTitle: ['a[class*=iROdnqnavpKyZuWdSFnmPfffMLnixsk] span strong'].join(","),
-      recruiter: ['span[class*=QMGXrjaeNxeiUcsCRfualFyKDrpJAGWKwjBlEU]'].join(","),
-      jobCard: ['li[class*=fHkvhtewVFBzjqWkcBEcQqgevCMImQ]'].join(","),
+      jobTitle: 'a[class*=iROdnqnavpKyZuWdSFnmPfffMLnixsk] span strong',
+      recruiter: 'span[class*=QMGXrjaeNxeiUcsCRfualFyKDrpJAGWKwjBlEU]',
+      jobCard: 'li[class*=fHkvhtewVFBzjqWkcBEcQqgevCMImQ]',
 
       description: 'div.mt4 p[dir="ltr"]'
     },
@@ -65,11 +65,12 @@
       "react", "vue", "angular",
       "laravel", "symfony", "codeigniter",
       "postgre", "mongo", "mysql", "sql",
+      "claude", "cursor", "copilot",
       "llm", "ai", "ml",
       "aws", "gcp", "ci/cd", "kubernetes", "docker"
     ],
 
-    descriptionRestrictKeywords: ["ai", "ml"]
+    descriptionRestrictKeywords: ["ai", "ml","rust"],
   };
 
   let settings = {
@@ -164,9 +165,9 @@
       return "";
     }
 
-    return element.innerText ||
+    return (element.innerText ||
       element.textContent ||
-      "";
+      "").trim();
   }
 
   // =========================================================
@@ -223,11 +224,13 @@
   function sendAnalysisToPopup() {
     const result =
       analyzeDescription();
+    console.log(result);
     chrome.runtime.sendMessage({
       type: "DESCRIPTION_ANALYSIS",
       payload: {
         site: SITE,
-        counts: result.counts
+        counts: result.counts,
+        description: result.description
       }
     }).catch(() => {
       // Popup isn't open. Ignore.
@@ -485,7 +488,8 @@
         sendResponse({
           success: true,
           site: SITE,
-          counts: result.counts
+          counts: result.counts,
+          description: result.description
         });
 
         return true;

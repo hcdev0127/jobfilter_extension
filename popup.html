@@ -4,15 +4,11 @@
 <head>
   <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Job Search Filter</title>
 
   <style>
-    
     * {
       box-sizing: border-box;
     }
@@ -179,6 +175,10 @@
       font-size: 12px;
       text-align: center;
     }
+
+    #txtDescription{
+      display: none;
+    }
   </style>
 </head>
 
@@ -201,12 +201,7 @@
       Blocked Job Titles / Keywords
     </label>
 
-    <input
-      id="titleKeywords"
-      type="text"
-      placeholder="trainee, intern, apprentice"
-      autocomplete="off"
-    >
+    <input id="titleKeywords" type="text" placeholder="trainee, intern, apprentice" autocomplete="off">
 
     <div class="hint">
       Comma-separated keywords.
@@ -225,12 +220,7 @@
       Blocked Recruiters
     </label>
 
-    <input
-      id="recruiters"
-      type="text"
-      placeholder="Noir, Hays"
-      autocomplete="off"
-    >
+    <input id="recruiters" type="text" placeholder="Noir, Hays" autocomplete="off">
 
     <div class="hint">
       Comma-separated recruiter names.
@@ -249,12 +239,7 @@
       Job Description Keywords
     </label>
 
-    <input
-      id="descriptionKeywords"
-      type="text"
-      placeholder="JavaScript, Spring, Python, CI/CD"
-      autocomplete="off"
-    >
+    <input id="descriptionKeywords" type="text" placeholder="JavaScript, Spring, Python, CI/CD" autocomplete="off">
 
     <div class="hint">
       Counts occurrences in the current job description.
@@ -287,10 +272,7 @@
         Current Job
       </span>
 
-      <span
-        id="site"
-        class="site"
-      >
+      <span id="site" class="site">
         —
       </span>
 
@@ -304,6 +286,14 @@
 
     </div>
 
+    <button id="copyButton" class="button" type="button">
+      Copy Techs
+    </button>
+    <hr />
+    <textarea id="txtDescription"></textarea>
+    <button id="copyDescriptionButton" class="button" type="button">
+      Copy Description
+    </button>
   </div>
 
 

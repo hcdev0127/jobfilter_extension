@@ -5,7 +5,8 @@
   "description": "Filter Reed.co.uk jobs by title and recruiter.",
   "permissions": [
     "storage",
-    "contextMenus"
+    "contextMenus",
+    "tabs"
   ],
   "host_permissions": [
     "https://www.reed.co.uk/*",
