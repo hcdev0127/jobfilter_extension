@@ -72,11 +72,13 @@ document.addEventListener(
         "html", "css", "javascript", "typescript", "php", "python", "golang", "rust", "ruby", "c#",
         "node.js", "django", "flask", ".net",
         "react", "vue", "angular",
+        "swift","flutter",
         "laravel", "symfony", "codeigniter",
-        "postgre", "mongo", "mysql", "sql",
+        "postgre", "mongo", "mysql", "sql","azure",
         "claude", "cursor", "copilot",
         "llm", "ai", "ml",
-        "aws", "gcp", "ci/cd", "kubernetes", "docker"
+        "aws", "gcp", "ci/cd", "kubernetes", "docker",
+        "saas"
       ]
     };
 
@@ -465,6 +467,9 @@ document.addEventListener(
           ) &&
           !url.includes(
             "jobs.workable.com"
+          ) &&
+          !url.includes(
+            "jobgether.com"
           )
         ) {
           return;
@@ -482,7 +487,7 @@ document.addEventListener(
         if (
           response?.success
         ) {
-
+          console.log(response);
           siteElement.textContent =
             response.site;
 
