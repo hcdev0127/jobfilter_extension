@@ -1,8 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "Reed Job Filter",
+  "name": "Job Filtering Research",
   "version": "2.1.0",
   "description": "Filter jobs and Analyze tech stacks.",
+  "icons":{
+    "32": "icon.png"
+  },
   "permissions": [
     "storage",
     "contextMenus",
