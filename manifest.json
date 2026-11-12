@@ -1,8 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "Reed Job Filter",
+  "name": "Job Filtering Research",
   "version": "2.1.0",
-  "description": "Filter Reed.co.uk jobs by title and recruiter.",
+  "description": "Filter jobs and Analyze tech stacks.",
+  "icons":{
+    "32": "icon.png"
+  },
   "permissions": [
     "storage",
     "contextMenus",
@@ -13,6 +16,7 @@
     "https://www.linkedin.com/jobs/*",
     "https://bebee.com/*",
     "https://jobs.workable.com/*",
+    "https://jobgether.com/*",
     "<all_urls>"
   ],
   "action": {
@@ -28,7 +32,8 @@
         "https://www.reed.co.uk/jobs/*",
         "https://www.linkedin.com/jobs/*",
         "https://bebee.com/*",
-        "https://jobs.workable.com/*"
+        "https://jobs.workable.com/*",
+        "https://jobgether.com/*"
       ],
       "js": [
         "content.js"

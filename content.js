@@ -13,7 +13,9 @@
 
   const SITE = location.hostname.includes("linkedin")
     ? "linkedin" : location.hostname.includes("reed")
-      ? "reed" : location.hostname.includes("bebee") ? "bebee" : "workable";
+      ? "reed" : location.hostname.includes("bebee")
+      ? "bebee" : location.hostname.includes("workable")
+       ? "workable" : "jobgether";
 
   // =========================================================
   // SELECTORS
@@ -31,16 +33,23 @@
 
     linkedin: {
       jobTitle: 'a[class*=iROdnqnavpKyZuWdSFnmPfffMLnixsk] span strong',
-      recruiter: 'span[class*=QMGXrjaeNxeiUcsCRfualFyKDrpJAGWKwjBlEU]',
-      jobCard: 'li[class*=fHkvhtewVFBzjqWkcBEcQqgevCMImQ]',
+      recruiter: 'div[class*=artdeco-entity-lockup__subtitle] span[dir=ltr]',
+      jobCard: 'li[data-occludable-job-id]',
 
       description: 'div.mt4 p[dir="ltr"]'
     },
     bebee: {
+      jobTitle: 'a[class*=iROdnqnavpKyZuWdSFnmPfffMLnixsk] span strong',
+      recruiter: 'span .truncate',
+      jobCard: 'article',
+
       description: 'div.max-w-4xl.mx-auto'
     },
     workable: {
       description: 'div.jobBreakdown__job-breakdown--31MGR'
+    },
+    jobgether: {
+      description: 'div.bg-white>h2.text-lg.font-bold.text-primary.mb-4:has(+ div.relative) + div.relative'
     }
   };
 
@@ -67,10 +76,11 @@
       "postgre", "mongo", "mysql", "sql",
       "claude", "cursor", "copilot",
       "llm", "ai", "ml",
-      "aws", "gcp", "ci/cd", "kubernetes", "docker"
+      "aws", "gcp", "ci/cd", "kubernetes", "docker",
+      "saas"
     ],
 
-    descriptionRestrictKeywords: ["ai", "ml","rust"],
+    descriptionRestrictKeywords: ["ai", "ml", "rust"],
   };
 
   let settings = {
